@@ -13,11 +13,11 @@ const { formatBytes } = useFormatting();
 
 <template>
 <div>
-	<h3>Books</h3>
-	<h4 v-if="!books">Loading...</h4>
+	<h2>Books</h2>
+	<h3 v-if="!books">Loading...</h3>
 	<ul>
 		<li v-for="book of books">
-			<div>{{ book.Title }}</div>
+			<h3>{{ book.Title }}</h3>
 			<div v-for="contributor of book.ContributorRoles">{{ contributor.Role ?? 'Author' }}: {{ contributor.Name }}</div>
 			<div v-if="book.Series">Book {{ book.Series.Number }} - {{ book.Series.Name }}</div>
 			<ul>

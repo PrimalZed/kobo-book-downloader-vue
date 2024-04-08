@@ -13,11 +13,11 @@ const { formatBytes, formatDuration } = useFormatting();
 
 <template>
 <div>
-	<h3>Audiobooks</h3>
-	<h4 v-if="!audiobooks">Loading...</h4>
+	<h2>Audiobooks</h2>
+	<h3 v-if="!audiobooks">Loading...</h3>
 	<ul>
 		<li v-for="audiobook of audiobooks">
-			<div>{{ audiobook.Title }}</div>
+			<h3>{{ audiobook.Title }}</h3>
 			<div v-for="contributor of audiobook.ContributorRoles">{{ contributor.Role }}: {{ contributor.Name }}</div>
 			<div v-if="audiobook.Series">Audiobook {{ audiobook.Series.Number }} - {{ audiobook.Series.Name }}</div>
 			<div>Duration: {{ formatDuration(audiobook.Duration) }}</div>
