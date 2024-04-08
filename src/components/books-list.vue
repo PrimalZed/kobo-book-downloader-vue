@@ -2,8 +2,9 @@
 import { useBookDownload } from '@/composables/use-book-download';
 import { useFormatting } from '@/composables/use-formatting';
 import { useKobo } from '@/stores/use-kobo';
+import { storeToRefs } from 'pinia';
 
-const { books } = useKobo();
+const { books } = storeToRefs(useKobo());
 
 const { downloadKdrm, downloading } = useBookDownload();
 
