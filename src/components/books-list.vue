@@ -5,7 +5,7 @@ import { useKobo } from '@/stores/use-kobo';
 
 const { books } = useKobo();
 
-const { downloadBook, downloading } = useBookDownload();
+const { downloadKdrm, downloading } = useBookDownload();
 
 const { formatBytes } = useFormatting();
 </script>
@@ -23,7 +23,7 @@ const { formatBytes } = useFormatting();
 				<template v-for="downloadUrl of book.DownloadUrls">
 					<li>
 						{{ downloadUrl.Platform }} {{ downloadUrl.Format }} ({{ formatBytes(downloadUrl.Size) }})
-						<a v-if="downloadUrl.DrmType === 'SignedNoDrm'" :href="downloadUrl.Url">
+						<a v-if="['None', 'SignedNoDrm'].includes(downloadUrl.DrmType)" :href="downloadUrl.Url">
 							Download DRM Free
 						</a>
 						<template v-else-if="book.RevisionId || book.Id">
@@ -31,12 +31,13 @@ const { formatBytes } = useFormatting();
 								v-if="downloadUrl.DrmType === 'KDRM'"
 								type="button"
 								:disabled="Boolean(downloading)"
-								@click="downloadBook((book.RevisionId ?? book.Id)!, downloadUrl.Url, book.Title)">
+								@click="downloadKdrm((book.RevisionId ?? book.Id)!, downloadUrl.Url, book.Title)">
 								<template v-if="downloading === downloadUrl.Url">Downloading...</template>
-								<template v-else>Download</template>
+								<template v-else>Download Decrypted EPUB</template>
 							</button>
+							<template v-else>{{ downloadUrl.DrmType }}</template>
 						</template>
-						<div v-else>DrmType: {{ downloadUrl.DrmType }}</div>
+						<template v-else>Error: No Id</template>
 					</li>
 				</template>
 			</ul>

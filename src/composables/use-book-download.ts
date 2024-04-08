@@ -45,7 +45,7 @@ export function useBookDownload() {
 	}
 
 	const downloading = ref<string>();
-	async function downloadBook(productId: string, url: string, title: string): Promise<void> {
+	async function downloadKdrm(productId: string, url: string, title: string): Promise<void> {
 		if (downloading.value) {
 			throw 'Already downloading something';
 		}
@@ -69,7 +69,7 @@ export function useBookDownload() {
 	}
 
 	return {
-		downloadBook,
+		downloadKdrm,
 		downloading: readonly(downloading),
 	};
 }
