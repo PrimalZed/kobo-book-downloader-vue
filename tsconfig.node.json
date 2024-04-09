@@ -7,7 +7,7 @@
     "nightwatch.conf.*",
     "playwright.config.*",
     "server/**/*",
-    "index",
+    "index.ts",
   ],
   "compilerOptions": {
     "composite": true,
