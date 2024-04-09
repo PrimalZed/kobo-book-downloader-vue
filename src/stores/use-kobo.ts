@@ -7,7 +7,6 @@ import type { Resources } from '@/models/resources';
 import { useInfiniteQuery, useQuery } from '@tanstack/vue-query';
 import axios from 'axios';
 import { defineStore } from 'pinia';
-import { v4 as uuidv4 } from 'uuid';
 import { computed, type MaybeRef, watch, ref, readonly } from 'vue';
 
 interface Authentication {
@@ -35,10 +34,6 @@ export const useKobo = defineStore('kobo', () => {
 	const APPLICATION_VERSION = '8.11.24971';
 	const DEFAULT_PLATFORM_ID = '00000000-0000-0000-0000-000000004000';
 	const DISPLAY_PLATFORM = 'Android';
-	const DEVICE_ID = localStorage.getItem('deviceId') ?? uuidv4();
-	if (!localStorage.getItem('deviceId')) {
-		localStorage.setItem('deviceId', DEVICE_ID);
-	}
 
 	// region axios
 	const authorizeApi = axios.create({ baseURL: '/kobo/authorize' });
@@ -68,13 +63,13 @@ export const useKobo = defineStore('kobo', () => {
 	// endregion
 
 	// region api requests
-	async function authenticateDevice(oldUserKey?: string): Promise<Authentication> {
+	async function authenticateDevice(deviceId: string, oldUserKey?: string): Promise<Authentication> {
 		const authenticateDeviceRequest = {
 			AffiliateName: KOBO_AFFILIATE,
 			AppVersion: APPLICATION_VERSION,
 			ClientKey: btoa(DEFAULT_PLATFORM_ID),
 			PlatformId: DEFAULT_PLATFORM_ID,
-			DeviceId: DEVICE_ID,
+			DeviceId: deviceId,
 			UserKey: oldUserKey,
 		};
 		const {
@@ -154,12 +149,12 @@ export const useKobo = defineStore('kobo', () => {
 		};
 	}
 
-	async function getSignInParameters(signInUrl: string): Promise<SignInParameters> {
+	async function getSignInParameters(deviceId: string, signInUrl: string): Promise<SignInParameters> {
 		const params = {
 			wsa: KOBO_AFFILIATE,
 			pwsav: APPLICATION_VERSION,
 			pwspid: DEFAULT_PLATFORM_ID,
-			pwsdid: DEVICE_ID,
+			pwsdid: deviceId,
 		};
 		
 		const { data: signInHtml } = await authorizeApi.get<string>(signInUrl, { params });
@@ -259,6 +254,15 @@ export const useKobo = defineStore('kobo', () => {
 	//endregion
 
 	// region state and queries
+	const deviceId = ref<string>(forgeDeviceId());
+	function forgeDeviceId(): string {
+		const deviceId = localStorage.getItem('deviceId') ?? crypto.randomUUID();
+		if (!localStorage.getItem('deviceId')) {
+			localStorage.setItem('deviceId', deviceId);
+		}
+		return deviceId;
+	}
+
 	const credentials = ref<Credentials>();
 	const initialUser: { userId: string, userKey: string } | undefined = (() => {
 		const json = localStorage.getItem('user');
@@ -267,11 +271,11 @@ export const useKobo = defineStore('kobo', () => {
 	const userKey = ref<string | undefined>(initialUser?.userKey);
 
 	const { data: authentications, fetchNextPage: refresh } = useInfiniteQuery({
-		queryKey: ['kobo', 'authentication', computed(() => userKey.value)],
-		queryFn: ({ queryKey: [,, userKey], pageParam: oldAuthentication }) => (
+		queryKey: ['kobo', 'authentication', deviceId, computed(() => userKey.value)] satisfies [string, string, MaybeRef<string>, MaybeRef<string | undefined>],
+		queryFn: ({ queryKey: [,, deviceId, userKey], pageParam: oldAuthentication }) => (
 			oldAuthentication && typeof(oldAuthentication) !== 'number' && (!userKey || oldAuthentication.userKey)
 			? refreshAuthentication(oldAuthentication)
-			: authenticateDevice(userKey)
+			: authenticateDevice(deviceId, userKey)
 		),
 		initialPageParam: 0,
 		getNextPageParam: (oldAuth: Authentication | number) => oldAuth,
@@ -284,6 +288,7 @@ export const useKobo = defineStore('kobo', () => {
 			? latest
 			: undefined;
 	});
+	const authenticated = computed(() => Boolean(authentication.value?.userKey));
 	const accessToken = computed(() => authentication.value
 		? `${authentication.value.tokenType} ${authentication.value.accessToken}`
 		: undefined
@@ -296,9 +301,9 @@ export const useKobo = defineStore('kobo', () => {
 	});
 
 	const { data: signInParameters } = useQuery({
-		queryKey: ['kobo', 'sign-in-parameters', computed(() => resources.value?.signInUrl!)] satisfies [string, string, MaybeRef<string>],
+		queryKey: ['kobo', 'sign-in-parameters', deviceId, computed(() => resources.value?.signInUrl!)] satisfies [string, string, MaybeRef<string>, MaybeRef<string>],
 		enabled: computed(() => Boolean(resources.value?.signInUrl) && Boolean(credentials.value)),
-		queryFn: ({ queryKey: [,, signInUrl] }) => getSignInParameters(signInUrl),
+		queryFn: ({ queryKey: [,, deviceId, signInUrl] }) => getSignInParameters(deviceId, signInUrl),
 	});
 
 	const { data: user } = useQuery({
@@ -330,9 +335,10 @@ export const useKobo = defineStore('kobo', () => {
 		signingOut.value = true;
 		await authorizeApi.get('us/en/SignOut');
 
+		localStorage.clear();
+		deviceId.value = forgeDeviceId();
 		credentials.value = undefined;
 		userKey.value = undefined;
-		localStorage.clear();
 
 		signingOut.value = false;
 	}
@@ -349,8 +355,8 @@ export const useKobo = defineStore('kobo', () => {
 
 	return {
 		credentials,
-		authenticated: computed(() => Boolean(authentication.value?.userKey)),
-		deviceId: computed(() => DEVICE_ID),
+		authenticated,
+		deviceId: readonly(deviceId),
 		userId: computed(() => user.value?.userId),
 		audiobooks,
 		books,
