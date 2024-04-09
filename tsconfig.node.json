@@ -8,6 +8,7 @@
     "playwright.config.*",
     "server/**/*",
     "index.ts",
+    "rollup.config.ts",
   ],
   "compilerOptions": {
     "composite": true,
