@@ -264,11 +264,11 @@ export const useKobo = defineStore('kobo', () => {
 	}
 
 	const credentials = ref<Credentials>();
-	const initialUser: { userId: string, userKey: string } | undefined = (() => {
+	const userKey = ref<string | undefined>(getInitialUser()?.userKey);
+	function getInitialUser(): { userId: string, userKey: string } | undefined {
 		const json = localStorage.getItem('user');
 		return json ? JSON.parse(json) : undefined;
-	})();
-	const userKey = ref<string | undefined>(initialUser?.userKey);
+	}
 
 	const { data: authentications, fetchNextPage: refresh } = useInfiniteQuery({
 		queryKey: ['kobo', 'authentication', deviceId, computed(() => userKey.value)] satisfies [string, string, MaybeRef<string>, MaybeRef<string | undefined>],
@@ -311,7 +311,7 @@ export const useKobo = defineStore('kobo', () => {
 		enabled: computed(() => Boolean(signInParameters.value) && Boolean(credentials.value)),
 		queryFn: ({ queryKey: [,, signInParameters, credentials]}) => signIn(signInParameters!, credentials!),
 		throwOnError: true,
-		initialData: () => initialUser,
+		initialData: getInitialUser,
 	});
 
 	const { data: syncItems } = useQuery({
@@ -355,6 +355,7 @@ export const useKobo = defineStore('kobo', () => {
 
 	return {
 		credentials,
+		authenticating: computed(() => Boolean(credentials.value) && !authenticated.value),
 		authenticated,
 		deviceId: readonly(deviceId),
 		userId: computed(() => user.value?.userId),
