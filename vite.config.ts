@@ -15,6 +15,8 @@ export default defineConfig(({ mode }) => {
 			}
 		},
 		server: {
+			host: process.env.VITE_FRONTEND_HOST,
+			port: Number(process.env.VITE_FRONTEND_PORT),
 			proxy: {
 				'/kobo': {
 					target: process.env.VITE_KOBO_URL,
@@ -22,6 +24,9 @@ export default defineConfig(({ mode }) => {
 					rewrite: (path) => path.replace(/^\/kobo/, ''),
 				},
 			},
+		},
+		build: {
+			outDir: 'dist/frontend',
 		},
 	};
 });

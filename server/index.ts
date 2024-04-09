@@ -1,30 +1,20 @@
-import cors from 'cors';
 import express from 'express';
 import vhost from 'vhost';
 import crypto from './crypto';
 import proxy from './proxy';
 
 const cryptoApp = express()
-  .use(cors({
-    methods: 'POST',
-    origin: 'http://localhost:5173',
-  }))
-  .use(crypto);
+  .use(crypto());
 const proxyApp = express()
-  .use(cors({
-    methods: 'GET,POST',
-    origin: 'http://localhost:5173',
-  }))
-  .use(proxy);
+  .use(proxy());
 
-const domain = 'local.gd';
 const app = express()
-  .use(vhost(`crypto.${domain}`, cryptoApp))
-  .use(vhost(`kobo.${domain}`, proxyApp));
+  .use(vhost(process.env.VITE_CRYPTO_HOST!, cryptoApp))
+  .use(vhost(process.env.VITE_KOBO_HOST!, proxyApp));
 
-const port = process.env.PORT || 3000;
+const port = process.env.VITE_BACKEND_PORT || 3000;
 const server = app.listen(port, () => {
-  console.log(`Server is Fire at http://localhost:${port}`);
+  console.log(`Server is Fire at http://${process.env.VITE_CRYPTO_HOST}:${port} & http://${process.env.VITE_KOBO_HOST}:${port}`);
 });
 
 import.meta.hot?.on('vite:beforeFullReload', () => server.close());

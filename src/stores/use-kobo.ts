@@ -7,6 +7,7 @@ import type { Resources } from '@/models/resources';
 import { useInfiniteQuery, useQuery } from '@tanstack/vue-query';
 import axios from 'axios';
 import { defineStore } from 'pinia';
+import { v4 as uuidv4 } from 'uuid';
 import { computed, type MaybeRef, watch, ref, readonly } from 'vue';
 
 interface Authentication {
@@ -34,7 +35,7 @@ export const useKobo = defineStore('kobo', () => {
 	const APPLICATION_VERSION = '8.11.24971';
 	const DEFAULT_PLATFORM_ID = '00000000-0000-0000-0000-000000004000';
 	const DISPLAY_PLATFORM = 'Android';
-	const DEVICE_ID = localStorage.getItem('deviceId') ?? crypto.randomUUID();
+	const DEVICE_ID = localStorage.getItem('deviceId') ?? uuidv4();
 	if (!localStorage.getItem('deviceId')) {
 		localStorage.setItem('deviceId', DEVICE_ID);
 	}
