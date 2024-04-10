@@ -1,4 +1,0 @@
-{
-	"main": "dist/index.js",
-	"output": "artifact/sea-prep.blob"
-}
