@@ -10,7 +10,7 @@ lerna-debug.log*
 node_modules
 .DS_Store
 .parcel-cache
-artifact
+artifacts
 dist
 dist-ssr
 coverage

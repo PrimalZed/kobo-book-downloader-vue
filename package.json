@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "bin": "dist/index.cjs",
   "scripts": {
     "dev:frontend": "vite",
     "dev:backend": "vite-node --watch server/index.ts",
@@ -12,14 +13,26 @@
     "build:env": "vite-node dotenv-bundle",
     "build:frontend": "vite build",
     "build:backend": "rollup --config rollup.config.ts --configPlugin \"rollup-plugin-typescript2={tsconfig: 'tsconfig.node.json'}\"",
+    "publish": "rimraf artifacts && npm run publish:pkg && npm run publish:rename",
+    "publish:pkg": "pkg --config pkg.json --public dist/index.cjs",
+    "publish:rename": "node -e \"require('fs').renameSync('artifacts/index.exe', 'artifacts/kbd.exe')\"",
     "preview": "vite preview",
     "test:unit": "vitest",
     "type-check": "vue-tsc --build --force"
   },
+  "pkg": {
+    "assets": [
+      "dist/.env",
+      "dist/frontend/**/*"
+    ],
+    "targets": [
+      "latest-win"
+    ],
+    "outputPath": "artifacts"
+  },
   "dependencies": {
     "@tanstack/vue-query": "^5.28.9",
     "@tanstack/vue-query-devtools": "^5.29.0",
-    "@types/vhost": "^3.0.9",
     "aes-js": "^3.1.2",
     "axios": "^1.6.8",
     "cors": "^2.8.5",
@@ -50,6 +63,7 @@
     "@types/multer": "^1.4.11",
     "@types/node": "^20.11.28",
     "@types/sha.js": "^2.4.4",
+    "@types/vhost": "^3.0.9",
     "@vitejs/plugin-vue": "^5.0.4",
     "@vue/test-utils": "^2.4.5",
     "@vue/tsconfig": "^0.5.1",
@@ -57,6 +71,7 @@
     "dotenv-expand": "^11.0.6",
     "jsdom": "^24.0.0",
     "make-dir": "^4.0.0",
+    "pkg": "^5.8.1",
     "rimraf": "^5.0.5",
     "rollup": "^4.14.1",
     "rollup-plugin-typescript2": "^0.36.0",

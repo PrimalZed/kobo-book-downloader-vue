@@ -1,9 +1,11 @@
-import 'dotenv/config';
+import { config } from 'dotenv';
 import express from 'express';
 import vhost from 'vhost';
 import crypto from './crypto';
 import kbd from './kbd';
 import proxy from './proxy';
+
+config({ path: `${__dirname}/.env` });
 
 const cryptoApp = express().use(crypto());
 const proxyApp = express().use(proxy());

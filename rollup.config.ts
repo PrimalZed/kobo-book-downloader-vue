@@ -7,7 +7,8 @@ import typescript from 'rollup-plugin-typescript2';
 export default {
 	input: 'server/index.ts',
 	output: {
-		file: 'dist/index.js',
+		file: 'dist/index.cjs',
+		format: 'cjs',
 	},
 	plugins: [
 		commonjs(),

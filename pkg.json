@@ -1,0 +1,5 @@
+{
+	"assets": ["dist/.env", "dist/frontend/**/*"],
+	"targets": [ "latest-win" ],
+	"outputPath": "artifacts"
+}
