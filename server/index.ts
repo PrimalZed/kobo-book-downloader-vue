@@ -21,7 +21,7 @@ if (process.env.PROD) {
 
 const port = process.env.VITE_BACKEND_PORT || 3000;
 const server = app.listen(port, () => {
-  console.log(`Server is Fire at http://${process.env.VITE_CRYPTO_HOST}:${port} & http://${process.env.VITE_KOBO_HOST}:${port}`);
+  console.log(`Running backend at http://${process.env.VITE_CRYPTO_HOST}:${port} & http://${process.env.VITE_KOBO_HOST}:${port}`);
   if (process.env.PROD) {
     console.log(`Open ${process.env.VITE_FRONTEND_URL} in browser to start`);
   }
