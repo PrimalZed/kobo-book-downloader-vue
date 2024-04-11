@@ -3,20 +3,25 @@ import captchaGrabber from '@/assets/captcha-grabber.js?raw';
 const emit = defineEmits<{ 'update:captcha': [captcha: string] }>();
 
 function copyCaptchaGrabber() {
-	return navigator.clipboard.writeText(captchaGrabber);	
+	return navigator.clipboard.writeText(captchaGrabber);
+}
+
+async function paste() {
+	const clipboardText = await navigator.clipboard.readText();
+	emit('update:captcha', clipboardText);
 }
 </script>
 
 <template>
-<div>Open new private browser window</div>
-<div>Go to <a href="https://authorize.kobo.com/signin">https://authorize.kobo.com/signin</a> and paste code into console:</div>
-<div>
-	<pre style="tab-size: 2em;" @click="copyCaptchaGrabber">{{ captchaGrabber }}</pre>
-</div>
-<div>
-	<label>Enter Captcha</label>
-	<div>
-		<textarea style="width:400px; height: 100px;" @input="emit('update:captcha', ($event.target as HTMLTextAreaElement).value)" />
-	</div>
-</div>
+<h4>Get a Captcha</h4>
+<ol>
+	<li><button type="button" @click="copyCaptchaGrabber">Click here to copy javascript to clipboard</button></li>
+	<li>Open new private browser window to <a href="https://authorize.kobo.com/signin">https://authorize.kobo.com/signin</a></li>
+	<li>Open browser dev tools with F12</li>
+	<li>Go to Console tab of browser dev tools</li>
+	<li>Paste javascript code and press Enter</li>
+	<li>Click on Captcha checkbox</li>
+	<li>Captcha is automatically copied to your clipboard, but you can also copy from the dev tools console result</li>
+	<li><button type="button" @click="paste">Click here to paste Captcha from clipboard</button></li>
+</ol>
 </template>

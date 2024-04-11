@@ -7,7 +7,7 @@ import type { Resources } from '@/models/resources';
 import { useInfiniteQuery, useQuery } from '@tanstack/vue-query';
 import axios from 'axios';
 import { defineStore } from 'pinia';
-import { computed, type MaybeRef, watch, ref, readonly } from 'vue';
+import { computed, type MaybeRef, watch, ref, readonly, onErrorCaptured } from 'vue';
 
 interface Authentication {
 	accessToken: string;
@@ -306,11 +306,10 @@ export const useKobo = defineStore('kobo', () => {
 		queryFn: ({ queryKey: [,, deviceId, signInUrl] }) => getSignInParameters(deviceId, signInUrl),
 	});
 
-	const { data: user } = useQuery({
+	const { data: user, isError: authenticationFailed } = useQuery({
 		queryKey: ['kobo', 'sign-in', signInParameters, credentials] satisfies [string, string, MaybeRef<SignInParameters | undefined>, MaybeRef<Credentials | undefined>],
 		enabled: computed(() => Boolean(signInParameters.value) && Boolean(credentials.value)),
 		queryFn: ({ queryKey: [,, signInParameters, credentials]}) => signIn(signInParameters!, credentials!),
-		throwOnError: true,
 		initialData: getInitialUser,
 	});
 
@@ -355,7 +354,8 @@ export const useKobo = defineStore('kobo', () => {
 
 	return {
 		credentials,
-		authenticating: computed(() => Boolean(credentials.value) && !authenticated.value),
+		authenticating: computed(() => Boolean(credentials.value) && !authenticated.value && !authenticationFailed.value),
+		authenticationFailed,
 		authenticated,
 		deviceId: readonly(deviceId),
 		userId: computed(() => user.value?.userId),
