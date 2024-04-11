@@ -1,12 +1,13 @@
 <script setup lang="ts">
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { VueQueryDevtools } from '@tanstack/vue-query-devtools';
 import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
-import { useKobo } from './stores/use-kobo';
 import audiobooksList from './components/audiobooks-list.vue';
 import booksList from './components/books-list.vue';
 import credentialsForm from './components/credentials-form.vue';
 import { usePreferredColorScheme } from './composables/use-preferred-color-scheme';
+import { useKobo } from './stores/use-kobo';
 
 const koboStore = useKobo();
 const { authenticating, authenticated } = storeToRefs(koboStore);
@@ -17,7 +18,12 @@ const colorScheme = usePreferredColorScheme();
 <template>
 <header :class="`navbar navbar-expand-lg sticky-top bg-${colorScheme}-subtle`">
 	<div class="container">
-		<div class="navbar-brand">Kobo Downloader</div>
+		<div class="navbar-brand">
+			Kobo Downloader
+			<a href="https://github.com/PrimalZed/kobo-book-downloader-vue" target="_blank">
+				<font-awesome-icon :icon="['fab', 'github']" />
+			</a>
+		</div>
 		<template v-if="!authenticated && !authenticating">
 			<div class="absolute-center">Sign In</div>
 		</template>
@@ -34,6 +40,7 @@ const colorScheme = usePreferredColorScheme();
 						@click="activeTab = 'audiobooks'"
 					>
 						Audiobooks
+						<font-awesome-icon :icon="['fas', 'headphones']" />
 					</button>
 				</div>
 				<div class="nav-item">
@@ -44,6 +51,7 @@ const colorScheme = usePreferredColorScheme();
 						@click="activeTab = 'books'"
 					>
 						Books
+						<font-awesome-icon :icon="['fas', 'book']" />
 					</button>
 				</div>
 			</div>
