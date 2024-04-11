@@ -13,7 +13,6 @@ const { formatBytes } = useFormatting();
 
 <template>
 <div>
-	<h2>Books</h2>
 	<h3 v-if="!books">Loading...</h3>
 	<ul>
 		<li v-for="book of books">
@@ -31,6 +30,7 @@ const { formatBytes } = useFormatting();
 							<button
 								v-if="downloadUrl.DrmType === 'KDRM'"
 								type="button"
+								class="btn btn-sm btn-primary"
 								:disabled="Boolean(downloading)"
 								@click="downloadKdrm((book.RevisionId ?? book.Id)!, downloadUrl.Url, book.Title)">
 								<template v-if="downloading === downloadUrl.Url">Downloading...</template>

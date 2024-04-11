@@ -13,7 +13,6 @@ const { formatBytes, formatDuration } = useFormatting();
 
 <template>
 <div>
-	<h2>Audiobooks</h2>
 	<h3 v-if="!audiobooks">Loading...</h3>
 	<ul>
 		<li v-for="audiobook of audiobooks">
@@ -27,6 +26,7 @@ const { formatBytes, formatDuration } = useFormatting();
 					<button
 						v-if="downloadUrl.DrmType === 'None' && downloadUrl.Format === 'MANIFEST'"
 						type="button"
+						class="btn btn-sm btn-primary"
 						:disabled="Boolean(downloading)"
 						@click="downloadAudiobookZip(audiobook.Title, downloadUrl.Url)"
 					>

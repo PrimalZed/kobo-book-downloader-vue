@@ -44,21 +44,24 @@ onMounted(() => {
 <template>
 <div v-if="failed">Authentication Failed</div>
 <div v-if="invalid">Enter username/email, password, and captcha</div>
-<form @submit.prevent="submit">
-	<div>Username/Email</div>
-	<input type="text" name="LogInModel.UserName" v-model="username">
-	<div>Password</div>
-	<input type="password" name="LogInModel.Password" v-model="password">
-
-	<captcha-grabber v-if="!captcha" @update:captcha="captcha = $event" />
-	<div v-else>
-		<h4>Captcha received:</h4>
-		<pre>{{ `${captcha.slice(0, 100)}${captcha.length > 100 ? '...' : ''}` }}</pre>
-		<button type="button" @click="captcha = undefined">New Captcha</button>
+<form class="d-flex flex-column align-items-center" @submit.prevent="submit">
+	<div style="width: 250px">
+		<label class="form-label">Username/Email</label>
+		<input type="text" class="form-control" name="LogInModel.UserName" v-model="username">
+		<label class="form-label">Password</label>
+		<input type="password" class="form-control" name="LogInModel.Password" v-model="password">
+	</div>
+	<div style="width: 400px">
+		<captcha-grabber v-if="!captcha" @update:captcha="captcha = $event" />
+		<template v-else>
+		<label class="form-label">Captcha received</label>
+			<pre style="white-space: pre-wrap; word-wrap: break-word;">{{ `${captcha.slice(0, 100)}${captcha.length > 100 ? '...' : ''}` }}</pre>
+			<button type="button" class="btn btn-secondary" @click="captcha = undefined">New Captcha</button>
+		</template>
 	</div>
 
 	<div>
-		<button type="submit">Sign In</button>
+		<button type="submit" class="btn btn-primary">Sign In</button>
 	</div>
 </form>
 </template>
