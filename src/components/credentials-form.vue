@@ -38,6 +38,7 @@ watch(captcha, (newCaptcha) => {
 
 onMounted(() => {
 	credentials.value = undefined;
+	document.querySelector<HTMLInputElement>('input')?.focus();
 });
 </script>
 
