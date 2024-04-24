@@ -159,17 +159,10 @@ export const useKobo = defineStore('kobo', () => {
 		
 		const { data: signInHtml } = await authorizeApi.get<string>(signInUrl, { params });
 
-		const partnerSignInUrl = new RegExp(/<a class="kobo-link partner-option kobo"\s+href="([^"]+)" onClick=""/).exec(signInHtml)?.[1]!;
+		const partnerSignInUrl = new RegExp(/<a class="primary-action partner-option kobo"\s+href="([^"]+)" onClick=""/).exec(signInHtml)?.[1]!;
 		const workflowId = new RegExp(/\?workflowId=([^"]{36})/).exec(partnerSignInUrl)?.[1]!;
 		const requestVerificationToken = new RegExp(/<input name="__RequestVerificationToken" type="hidden" value="([^"]+)" \/>/).exec(signInHtml)?.[1]!;
 		const koboUrl = new RegExp(/location\.href='(.+)';/).exec(signInHtml)?.[1]!;
-
-		console.log({
-			partnerSignInUrl,
-			workflowId,
-			requestVerificationToken,
-			koboUrl,
-		});
 		return {
 			partnerSignInUrl,
 			workflowId,
