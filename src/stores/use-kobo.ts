@@ -7,7 +7,7 @@ import type { Resources } from '@/models/resources';
 import { useInfiniteQuery, useQuery } from '@tanstack/vue-query';
 import axios from 'axios';
 import { defineStore } from 'pinia';
-import { computed, type MaybeRef, watch, ref, readonly, onErrorCaptured } from 'vue';
+import { computed, type MaybeRef, watch, ref, readonly } from 'vue';
 
 interface Authentication {
 	accessToken: string;
@@ -15,17 +15,6 @@ interface Authentication {
 	refreshToken: string;
 	userKey?: string;
 	trackingId: string;
-}
-interface SignInParameters {
-	partnerSignInUrl: string;
-	workflowId: string;
-	requestVerificationToken: string;
-	koboUrl: string;
-}
-export interface Credentials {
-	email: string;
-	password: string;
-	captcha: string;
 }
 type SyncItem = { kind: 'audiobook', metadata: AudiobookMetadata } | { kind: 'book', metadata: BookMetadata };
 
@@ -36,7 +25,6 @@ export const useKobo = defineStore('kobo', () => {
 	const DISPLAY_PLATFORM = 'Android';
 
 	// region axios
-	const authorizeApi = axios.create({ baseURL: '/kobo/authorize' });
 	const koboApi = axios.create({ baseURL: `${import.meta.env.VITE_KOBO_URL}/store` });
 	
 	koboApi.defaults.headers.common['Content-Type'] = 'application/json';
@@ -149,65 +137,6 @@ export const useKobo = defineStore('kobo', () => {
 		};
 	}
 
-	async function getSignInParameters(deviceId: string, signInUrl: string): Promise<SignInParameters> {
-		const params = {
-			wsa: KOBO_AFFILIATE,
-			pwsav: APPLICATION_VERSION,
-			pwspid: DEFAULT_PLATFORM_ID,
-			pwsdid: deviceId,
-		};
-		
-		const { data: signInHtml } = await authorizeApi.get<string>(signInUrl, { params });
-
-		const partnerSignInUrl = new RegExp(/<a class="primary-action partner-option kobo"\s+href="([^"]+)" onClick=""/).exec(signInHtml)?.[1]!;
-		const workflowId = new RegExp(/\?workflowId=([^"]{36})/).exec(partnerSignInUrl)?.[1]!;
-		const requestVerificationToken = new RegExp(/<input name="__RequestVerificationToken" type="hidden" value="([^"]+)" \/>/).exec(signInHtml)?.[1]!;
-		const koboUrl = new RegExp(/location\.href='(.+)';/).exec(signInHtml)?.[1]!;
-		return {
-			partnerSignInUrl,
-			workflowId,
-			requestVerificationToken,
-			koboUrl,
-		};
-	}
-
-	async function signIn(
-		{ partnerSignInUrl, workflowId, requestVerificationToken, koboUrl: existingKoboUrl }: SignInParameters,
-		{ email, password, captcha }: Credentials
-	): Promise<{ userId: string, userKey: string }> {
-		const koboUrlString = existingKoboUrl
-			? existingKoboUrl
-			: await (async () => {
-				const params = new URLSearchParams({
-					'LogInModel.WorkflowId': workflowId,
-					'LogInModel.Provider': KOBO_AFFILIATE,
-					'ReturnUrl': '',
-					'__RequestVerificationToken': requestVerificationToken,
-					'LogInModel.UserName': email,
-					'LogInModel.Password': password,
-					'g-recaptcha-response': captcha,
-					'h-captcha-response': captcha,
-				})
-				const { data: html } = await authorizeApi.post<string>(partnerSignInUrl, params, { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
-				// Expecting
-				// <script type='text/javascript'>location.href='kobo://UserAuthenticated?userId=########-####-####-####-############&userKey=########-####-####-####-############&email=xxxx%40xxx.xxx&returnUrl=http%3a%2f%2fkobo.com%2f';</script>
-				return new RegExp(/location\.href='(.+)';/).exec(html)?.[1]!;
-			})();
-
-		if (!koboUrlString) {
-			throw 'Sign In Failed';
-		}
-		const koboUrl = new URL(koboUrlString);
-		const userId = koboUrl.searchParams.get('userId');
-		const userKey = koboUrl.searchParams.get('userKey');
-
-		if (!userId || !userKey) {
-			throw 'Failed parsing koboUrl for userId, userKey';
-		}
-
-		return { userId, userKey };
-	}
-
 	async function getSyncItems(continuationToken?: string): Promise<SyncItem[]> {
 		const { data, headers } = await koboApi.get<LibrarySyncItem[]>(resources.value?.librarySyncUrl!, { headers: { 'x-kobo-synctoken': continuationToken } });
 
@@ -256,14 +185,27 @@ export const useKobo = defineStore('kobo', () => {
 		return deviceId;
 	}
 
-	const credentials = ref<Credentials>();
-	const userKey = ref<string | undefined>(getInitialUser()?.userKey);
-	function getInitialUser(): { userId: string, userKey: string } | undefined {
-		const json = localStorage.getItem('user');
-		return json ? JSON.parse(json) : undefined;
+	const koboUrl = ref<string | undefined>(getStorageKoboUrl());
+	function getStorageKoboUrl(): string | undefined {
+		return localStorage.getItem('koboUrl') ?? undefined;
 	}
 
-	const { data: authentications, fetchNextPage: refresh } = useInfiniteQuery({
+	const koboUserAuthenticated = computed<{ userId: string, userKey: string} | undefined>(() =>
+		koboUrl.value
+			? Array.from(new URL(koboUrl.value).searchParams.entries())
+				.reduce(
+					(acc, [key, value]) => ({
+						...acc,
+						[key]: value
+					}),
+					{}
+				) as {userId: string, userKey: string}
+			: undefined
+	);
+
+	const userKey = computed(() => koboUserAuthenticated.value?.userKey);
+
+	const { data: authentications, fetchNextPage: refresh, isError: authenticationFailed } = useInfiniteQuery({
 		queryKey: ['kobo', 'authentication', deviceId, computed(() => userKey.value)] satisfies [string, string, MaybeRef<string>, MaybeRef<string | undefined>],
 		queryFn: ({ queryKey: [,, deviceId, userKey], pageParam: oldAuthentication }) => (
 			oldAuthentication && typeof(oldAuthentication) !== 'number' && (!userKey || oldAuthentication.userKey)
@@ -293,19 +235,6 @@ export const useKobo = defineStore('kobo', () => {
 		queryFn: getResources,
 	});
 
-	const { data: signInParameters } = useQuery({
-		queryKey: ['kobo', 'sign-in-parameters', deviceId, computed(() => resources.value?.signInUrl!)] satisfies [string, string, MaybeRef<string>, MaybeRef<string>],
-		enabled: computed(() => Boolean(resources.value?.signInUrl) && Boolean(credentials.value)),
-		queryFn: ({ queryKey: [,, deviceId, signInUrl] }) => getSignInParameters(deviceId, signInUrl),
-	});
-
-	const { data: user, isError: authenticationFailed } = useQuery({
-		queryKey: ['kobo', 'sign-in', signInParameters, credentials] satisfies [string, string, MaybeRef<SignInParameters | undefined>, MaybeRef<Credentials | undefined>],
-		enabled: computed(() => Boolean(signInParameters.value) && Boolean(credentials.value)),
-		queryFn: ({ queryKey: [,, signInParameters, credentials]}) => signIn(signInParameters!, credentials!),
-		initialData: getInitialUser,
-	});
-
 	const { data: syncItems } = useQuery({
 		queryKey: ['kobo', 'sync', computed(() => authentication.value?.userKey!)] satisfies [string, string, MaybeRef<string>],
 		enabled: computed(() => Boolean(resources.value) && Boolean(authentication.value?.userKey)),
@@ -323,35 +252,40 @@ export const useKobo = defineStore('kobo', () => {
 	// endregion
 
 	const signingOut = ref(false);
-	async function signOut() {
+	function signOut() {
 		signingOut.value = true;
-		await authorizeApi.get('us/en/SignOut');
 
 		localStorage.clear();
 		deviceId.value = forgeDeviceId();
-		credentials.value = undefined;
-		userKey.value = undefined;
+		koboUrl.value = undefined;
 
 		signingOut.value = false;
 	}
 
-	watch(user, (newUser) => {
-		if (newUser) {
-			localStorage.setItem('user', JSON.stringify(newUser));
+	watch(koboUrl, (newKoboUrl) => {
+		if (newKoboUrl) {
+			localStorage.setItem('koboUrl', newKoboUrl);
 		}
 		else {
-			localStorage.removeItem('user');
+			localStorage.removeItem('koboUrl');
 		}
-		userKey.value = newUser?.userKey;
 	});
 
 	return {
-		credentials,
-		authenticating: computed(() => Boolean(credentials.value) && !authenticated.value && !authenticationFailed.value),
+		authenticating: computed(() => Boolean(koboUrl.value) && !authenticated.value && !authenticationFailed.value),
 		authenticationFailed,
 		authenticated,
+		signInParameters: computed(() => ({
+			wsa: KOBO_AFFILIATE,
+			pwsav: APPLICATION_VERSION,
+			pwspid: DEFAULT_PLATFORM_ID,
+			pwsdid: deviceId.value,
+		})),
 		deviceId: readonly(deviceId),
-		userId: computed(() => user.value?.userId),
+		setKoboUrl: function (value: string) {
+			koboUrl.value = value
+		},
+		userId: computed(() => koboUserAuthenticated.value?.userId),
 		audiobooks,
 		books,
 		signingOut: readonly(signingOut),
