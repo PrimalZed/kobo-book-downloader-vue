@@ -5,7 +5,7 @@ import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
 import audiobooksList from './components/audiobooks-list.vue';
 import booksList from './components/books-list.vue';
-import credentialsForm from './components/credentials-form.vue';
+import koboSchemeForm from './components/kobo-scheme-form.vue';
 import { usePreferredColorScheme } from './composables/use-preferred-color-scheme';
 import { useKobo } from './stores/use-kobo';
 
@@ -60,7 +60,7 @@ const colorScheme = usePreferredColorScheme();
 	</div>
 </header>
 <main class="container">
-	<credentials-form v-if="!authenticating && !authenticated" />
+	<kobo-scheme-form v-if="!authenticating && !authenticated" />
 	<template v-else-if="authenticated">
 		<audiobooks-list v-if="activeTab === 'audiobooks'" />
 		<books-list v-else-if="activeTab === 'books'" />
