@@ -38,13 +38,12 @@ Instructions for just using the executable to run the application and download a
 </details>
 
 3. Open web browser to [http://localhost:3000](http://localhost:3000)
-1. Sign in with kobo.com username and password, and following instructions to get captcha
+1. Follow instructions to get Kobo device authentication
 <details>
 <summary>Sign In Page</summary>
 
 ![sign in page](docs/sign-in.png)
-![captcha](docs/captcha.png)
-![clipboard access](docs/clipboard-access.png)
+![kobo userauthenticated url](docs/user-authenticated-request.png)
 </details>
 
 5. Download audiobook (audio files in .zip) or books (.epub)

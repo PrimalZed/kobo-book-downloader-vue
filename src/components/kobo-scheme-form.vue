@@ -22,22 +22,23 @@ function submit() {
 }
 </script>
 <template>
-<form class="d-flex flex-column align-items-center" @submit.prevent="submit">
-	<ol>
-		<li>Open new private browser window to <a :href="signInUrl">{{ signInUrl }}</a></li>
-		<li>Open browser dev tools with F12</li>
-		<li>Complete Kobo sign in (should lead to url <code>https://auth.kobobooks.com/CrossDomainSignIn</code> with blank web page)</li>
-		<li>Go to Console tab of browser dev tools</li>
-		<li>Find final, failed network request that starts with <code>kobo://UserAuthenticated?</code></li>
-		<li>Right click failed network request -> Copy -> Copy URL</li>
-		<li>Paste url into sign-in form below</li>
-	</ol>
-	<div style="width: 450px">
-		<label class="form-label">Enter kobo-scheme url</label>
-		<textarea class="form-control" name="koboSchemeUrl" v-model="koboSchemeUrl" required pattern="kobo://UserAuthenticated\?.*"></textarea>
-	</div>
-	<div>
-		<button type="submit" class="btn btn-primary">Sign In</button>
-	</div>
+	<form class="d-flex flex-column align-items-center" @submit.prevent="submit">
+		<ol>
+			<li>Open new private browser window to <a :href="signInUrl">{{ signInUrl }}</a></li>
+			<li>Open browser dev tools with F12</li>
+			<li>Complete Kobo sign in (should lead to url <code>https://auth.kobobooks.com/CrossDomainSignIn</code> with blank web page)</li>
+			<li>Go to Console tab of browser dev tools</li>
+			<li>Find final, failed network request that starts with <code>kobo://UserAuthenticated?</code></li>
+			<li>Right click failed network request -> Copy -> Copy URL</li>
+			<li>Paste url into sign-in form below</li>
+		</ol>
+		<div style="width: 450px">
+			<label class="form-label">Enter kobo-scheme url</label>
+			<textarea class="form-control" name="koboSchemeUrl" v-model="koboSchemeUrl" required pattern="kobo://UserAuthenticated\?.*"></textarea>
+		</div>
+		<div>
+			<button type="submit" class="btn btn-primary">Sign In</button>
+		</div>
 	</form>
+	<div>To log out of kobo.com, go to <a href="https://www.kobo.com" target="_blank">www.kobo.com</a> and clear cookies.</div>
 </template>
