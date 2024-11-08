@@ -7,6 +7,7 @@ export default function() {
 		.use(cors({
 			methods: 'GET,POST',
 			origin: process.env.VITE_FRONTEND_URL,
+			exposedHeaders: '*',
 		}));
 
 	router.use('/downloads', createProxyMiddleware({
