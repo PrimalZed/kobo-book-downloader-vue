@@ -1,0 +1,8 @@
+{
+	"assets": [
+		"dist/.env",
+		"dist/frontend/**/*"
+	],
+	"targets": ["node18-macos-arm64"],
+	"outputPath": "artifacts"
+}

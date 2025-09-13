@@ -5,24 +5,12 @@ This is a successful build of the Kobo Book Downloader for Apple Silicon (M1/M2)
 ## Build Process
 
 1. Cloned the original repository
-2. Modified pkg.json to target macOS ARM64:
-```json
-{
-  "assets": [
-    "dist/.env",
-    "dist/frontend/**/*"
-  ],
-  "targets": ["node18-macos-arm64"],
-  "outputPath": "artifacts"
-}
-```
-
 3. Built using Node.js v23.9.0 and npm 10.9.2
 4. Build commands used:
    ```bash
    npm install
    npm run build
-   npm run publish
+   npm run publish:macos
    ```
 
 ## Running the Application
