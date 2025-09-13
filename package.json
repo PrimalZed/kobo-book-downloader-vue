@@ -15,7 +15,7 @@
     "build:backend": "rollup --config rollup.config.ts --configPlugin \"rollup-plugin-typescript2={tsconfig: 'tsconfig.node.json'}\"",
     "publish": "rimraf artifacts && npm run publish:pkg && npm run publish:rename",
     "publish:pkg": "pkg --config pkg.json --public dist/index.cjs",
-    "publish:rename": "node -e \"require('fs').renameSync('artifacts/index.exe', 'artifacts/kbd.exe')\"",
+    "publish:rename": "node -e \"const fs=require('fs'); try{fs.renameSync('artifacts/index.exe','artifacts/kbd.exe')}catch{}; try{fs.renameSync('artifacts/index','artifacts/kbd')}catch{}\"",
     "preview": "vite preview",
     "test:unit": "vitest",
     "type-check": "vue-tsc --build --force"
@@ -26,7 +26,8 @@
       "dist/frontend/**/*"
     ],
     "targets": [
-      "latest-win"
+      "latest-win",
+      "latest-macos-arm64"
     ],
     "outputPath": "artifacts"
   },

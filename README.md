@@ -29,8 +29,15 @@ Utility for downloading purchased audiobook MP3 and decrypted epub files from yo
 
 Instructions for just using the executable to run the application and download audiobooks and ebooks from Kobo:
 
+## Windows
 1. [Download `kbd.exe` from latest release here.](https://github.com/PrimalZed/kobo-book-downloader-vue/releases)
 1. Run `kbd.exe` (See above for expected warnings)
+
+## macOS (Apple Silicon)
+1. [Download `kbd` from latest release here.](https://github.com/PrimalZed/kobo-book-downloader-vue/releases)
+1. Make it executable: `chmod +x kbd`
+1. Run `./kbd`
+1. If macOS blocks it, go to System Preferences > Security & Privacy and allow it to run
 <details>
 <summary>kbd.exe running in terminal</summary>
 
@@ -74,13 +81,19 @@ Requires [`npm`](https://www.npmjs.com/)
 
 Creates `dist` folder with files to run with node. Can be run with `node dist/index.cjs`, and the web app access at [http://localhost:3000](http://localhost:3000)
 
-## Create `kbd.exe`
+## Create executables
 1. `git clone https://github.com/PrimalZed/kobo-book-downloader-vue.git` to get source files
 1. `npm ci` to install dependency packages in this workspace
 1. `npm run build`
 1. `npm run publish`
 
-Creates `artifacts/kbd.exe` file. Can be moved/shared to run from anywhere, and the web app accessed while running at [http://localhost:3000](http://localhost:3000).
+Creates executable files in the `artifacts/` folder:
+- `kbd.exe` (Windows)
+- `kbd` (macOS Apple Silicon)
+
+These can be moved/shared to run from anywhere, and the web app accessed while running at [http://localhost:3000](http://localhost:3000).
+
+For detailed macOS build information, see [README-M1.md](README-M1.md).
 
 ## Tech Stack
 This application is built with [`Node.js`](https://nodejs.org/en), [`express`](https://expressjs.com/), and [`Vue.js`](https://vuejs.org/).
