@@ -14,8 +14,11 @@
     "build:frontend": "vite build",
     "build:backend": "rollup --config rollup.config.ts --configPlugin \"rollup-plugin-typescript2={tsconfig: 'tsconfig.node.json'}\"",
     "publish": "rimraf artifacts && npm run publish:pkg && npm run publish:rename",
+    "publish:macos": "rimraf artifacts && npm run publish:pkg:macos && npm run publish:rename:macos",
     "publish:pkg": "pkg --config pkg.json --public dist/index.cjs",
+    "publish:pkg:macos": "pkg --config pkg.macos.json --public dist/index.cjs",
     "publish:rename": "node -e \"require('fs').renameSync('artifacts/index.exe', 'artifacts/kbd.exe')\"",
+    "publicsh:rename:macos": "node -e \"require('fs').renameSync('artifacts/index', 'artifacts/kbd')\"",
     "preview": "vite preview",
     "test:unit": "vitest",
     "type-check": "vue-tsc --build --force"
@@ -26,7 +29,8 @@
       "dist/frontend/**/*"
     ],
     "targets": [
-      "latest-win"
+      "latest-win",
+      "latest-macos-arm64"
     ],
     "outputPath": "artifacts"
   },
