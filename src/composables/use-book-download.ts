@@ -45,7 +45,7 @@ export function useBookDownload() {
 	}
 
 	const downloading = ref<string>();
-	async function downloadKdrm(productId: string, url: string, title: string): Promise<void> {
+	async function downloadKdrm(productId: string, url: string, title: string, author?: string): Promise<void> {
 		if (downloading.value) {
 			throw 'Already downloading something';
 		}
@@ -64,7 +64,7 @@ export function useBookDownload() {
 			queryFn: async () => decryptFile(encryptedFile, fileKeys),
 		});
 
-		saveAs(decryptedFile, `${title}.epub`);
+		saveAs(decryptedFile, `${title}${author ? ` - ${author}` : ''}.epub`);
 		downloading.value = undefined;
 	}
 

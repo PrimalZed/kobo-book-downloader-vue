@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { useAudiobookDownload } from '@/composables/use-audiobook-download';
+import useBookHelpers from '@/composables/use-book-helpers';
 import { useFormatting } from '@/composables/use-formatting';
 import { useKobo } from '@/stores/use-kobo';
 import { storeToRefs } from 'pinia';
@@ -9,6 +10,8 @@ const { audiobooks } = storeToRefs(useKobo());
 const { downloadAudiobookZip, downloading } = useAudiobookDownload();
 
 const { formatBytes, formatDuration } = useFormatting();
+
+const { getAuthor } = useBookHelpers();
 </script>
 
 <template>
@@ -28,7 +31,7 @@ const { formatBytes, formatDuration } = useFormatting();
 						type="button"
 						class="btn btn-sm btn-primary"
 						:disabled="Boolean(downloading)"
-						@click="downloadAudiobookZip(audiobook.Title, downloadUrl.Url)"
+						@click="downloadAudiobookZip(downloadUrl.Url, audiobook.Title, getAuthor(audiobook))"
 					>
 						<template v-if="downloading === downloadUrl.Url">Downloading...</template>
 						<template v-else>Download Zip</template>
