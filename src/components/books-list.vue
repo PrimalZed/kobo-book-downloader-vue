@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { useBookDownload } from '@/composables/use-book-download';
+import useBookHelpers from '@/composables/use-book-helpers';
 import { useFormatting } from '@/composables/use-formatting';
 import { useKobo } from '@/stores/use-kobo';
 import { storeToRefs } from 'pinia';
@@ -9,6 +10,8 @@ const { books } = storeToRefs(useKobo());
 const { downloadKdrm, downloading } = useBookDownload();
 
 const { formatBytes } = useFormatting();
+
+const { getAuthor } = useBookHelpers();
 </script>
 
 <template>
@@ -32,7 +35,7 @@ const { formatBytes } = useFormatting();
 								type="button"
 								class="btn btn-sm btn-primary"
 								:disabled="Boolean(downloading)"
-								@click="downloadKdrm((book.RevisionId ?? book.Id)!, downloadUrl.Url, book.Title)">
+								@click="downloadKdrm((book.RevisionId ?? book.Id)!, downloadUrl.Url, book.Title, getAuthor(book))">
 								<template v-if="downloading === downloadUrl.Url">Downloading...</template>
 								<template v-else>Download Decrypted EPUB</template>
 							</button>

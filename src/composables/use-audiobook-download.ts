@@ -32,7 +32,7 @@ export function useAudiobookDownload() {
 	}
 
 	const downloading = ref<string>();
-	async function downloadAudiobookZip(title: string, contentsUrl: string): Promise<void> {
+	async function downloadAudiobookZip(contentsUrl: string, title: string, author?: string): Promise<void> {
 		if (downloading.value) {
 			throw 'Already downloading something';
 		}
@@ -59,7 +59,7 @@ export function useAudiobookDownload() {
 			},
 		});
 
-		saveAs(zip, `${title}.zip`);
+		saveAs(zip, `${title}${author ? ` - ${author}` : ''}.zip`);
 		downloading.value = undefined;
 	}
 
